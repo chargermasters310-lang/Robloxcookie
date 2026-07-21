@@ -328,19 +328,20 @@
       <p class="boot-line"><span>[boot]</span> warning block extractor initialized. ready for input.</p>
 
       <div class="desc">
-        Extracts blocks that start with <code>_|</code> or <code>_%7C</code> and end with
-        <code>|_</code> or <code>%7C_</code> (mobile and desktop render the pipe differently).
-        Special characters are allowed inside a block; a bare <code>%</code> ends it early. All
-        <code>%7C</code> sequences are decoded to <code>|</code> in the output.
+        Extracts blocks starting with <code>_|</code> or <code>_%7C</code>. Special characters
+        are allowed inside a block, a bare <code>%</code> ends it — except the literal sequences
+        <code>%7C_</code> and <code>_%7C</code>, which pass through and render as <code>|_</code>
+        and <code>_|</code>. Every block always ends on a letter or digit.
       </div>
 
       <div class="section">
         <div class="prompt-label">input stream</div>
-        <textarea id="input" placeholder="Paste your text here...">_|WARNING123|_ something else
-_%7CWARNING-abc%7C_ more text
-_|WARNING_xyz9|_ stop here
-_%7CWARNING50%off should not match, no closing pair
-_|WARNING%7C_middle|_ mixed sequence inside</textarea>
+        <textarea id="input" placeholder="Paste your text here...">_|WARNING123!! something else
+_%7C-abc!!! more text
+random_%7C_xyz9--- stop here
+_|!!! (no valid ending)
+_%7C50%off should stop before the percent
+_|%7C_valid should include the sequence</textarea>
         <div class="options">
           <label class="opt"><input type="checkbox" id="ignoreCase"> case-insensitive</label>
         </div>
@@ -392,11 +393,7 @@ _|WARNING%7C_middle|_ mixed sequence inside</textarea>
 
   function getPattern() {
     const flags = 'g' + (ignoreCase.checked ? 'i' : '');
-    const mid = String.raw`(?:%7C_|_%7C|[^\s%])*`;
-    return new RegExp(
-      String.raw`_\|${mid}\|_` + '|' + String.raw`_%7C${mid}%7C_`,
-      flags
-    );
+    return new RegExp(String.raw`(?:_\||_%7C)(?:%7C_|_%7C|[^\s%])*[A-Za-z0-9]`, flags);
   }
 
   function run() {
