@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RBLX Cookie</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #050505;
+    --term: #080a09;
+    --green: #4dff9e;
+    --green-bright: #a8ffce;
+    --green-dim: #2a6b48;
+    --line: #1b2620;
+    --muted: #5c7a6a;
+    --danger: #ff5f5f;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 42px 42px;
+    background-position: center;
+  }
+
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 18px 70px;
+  }
+
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .statusbar .live {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .live .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .term {
+    background: var(--term);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px rgba(77,255,158,0.04), 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .term-bar .dots { display: flex; gap: 7px; }
+  .term-bar .dots span {
+    width: 11px; height: 11px; border-radius: 50%;
+    display: block;
+  }
+  .term-bar .dots span:nth-child(1) { background: #ff5f57; }
+  .term-bar .dots span:nth-child(2) { background: #febc2e; }
+  .term-bar .dots span:nth-child(3) { background: #28c840; }
+  .term-title {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .term-body { padding: 22px; }
+
+  .logo-line {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--green-bright);
+    text-shadow: 0 0 20px rgba(77,255,158,0.4);
+    margin: 0;
+  }
+  .logo-line .caret {
+    display: inline-block;
+    width: 12px; height: 24px;
+    background: var(--green);
+    margin-left: 6px;
+    vertical-align: -3px;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .boot-line {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 8px 0 0 0;
+  }
+  .boot-line span { color: var(--green-dim); }
+
+  .desc {
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.8;
+    margin: 18px 0 0 0;
+    padding: 14px;
+    border-left: 2px solid var(--green-dim);
+    background: rgba(77,255,158,0.03);
+  }
+  .desc code {
+    color: var(--green);
+    background: rgba(77,255,158,0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .section { margin-top: 26px; }
+  .prompt-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green-dim);
+    margin-bottom: 8px;
+  }
+  .prompt-label::before { content: '>_'; color: var(--green); font-weight: 700; }
+
+  textarea {
+    width: 100%;
+    min-height: 200px;
+    background: #030403;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.75;
+    padding: 16px;
+    resize: vertical;
+    caret-color: var(--green-bright);
+  }
+  textarea::placeholder { color: var(--muted); }
+  textarea:focus {
+    outline: none;
+    border-color: var(--green-dim);
+    box-shadow: 0 0 0 1px var(--green-dim);
+  }
+
+  .options {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-top: 12px;
+  }
+  label.opt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  label.opt input {
+    appearance: none;
+    width: 14px; height: 14px;
+    border: 1px solid var(--green-dim);
+    background: #030403;
+    cursor: pointer;
+    position: relative;
+  }
+  label.opt input:checked { background: var(--green); }
+  label.opt input:checked::after {
+    content: '✓';
+    position: absolute;
+    top: -3px; left: 1px;
+    font-size: 10px;
+    color: #030403;
+    font-weight: 800;
+  }
+
+  .out-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 30px 0 8px;
+  }
+  .out-head .prompt-label { margin: 0; }
+  .out-actions { display: flex; align-items: center; gap: 10px; }
+
+  .count-chip {
+    font-size: 11px;
+    color: var(--green);
+    border: 1px solid var(--green-dim);
+    padding: 3px 9px;
+    border-radius: 3px;
+  }
+
+  button {
+    font-family: 'JetBrains Mono', monospace;
+    background: transparent;
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  button:hover:not(:disabled) {
+    background: var(--green);
+    color: #030403;
+    box-shadow: 0 0 14px rgba(77,255,158,0.4);
+  }
+  button:disabled { opacity: 0.3; cursor: default; }
+  button#clearBtn:hover:not(:disabled) {
+    background: var(--danger);
+    border-color: var(--danger);
+    box-shadow: 0 0 14px rgba(255,95,95,0.4);
+  }
+
+  .output {
+    background: #030403;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    min-height: 60px;
+  }
+  .match-row {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .match-row:last-child { border-bottom: none; }
+  .match-text {
+    color: var(--green-bright);
+    word-break: break-all;
+  }
+  .empty {
+    padding: 26px 14px;
+    color: var(--muted);
+    font-size: 12.5px;
+    text-align: center;
+  }
+  .empty::before { content: '[!] '; color: var(--danger); }
+
+  .preview-box {
+    background: #030403;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 16px;
+    font-size: 12.5px;
+    line-height: 1.85;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--muted);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .preview-box mark {
+    background: rgba(77,255,158,0.15);
+    color: var(--green-bright);
+    border-bottom: 1px solid var(--green);
+    padding: 0 1px;
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 4px; }
+
+  .term-footer {
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    font-size: 10.5px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="statusbar">
+    <span>RBLX-COOKIE / v2.0</span>
+    <span class="live"><span class="dot"></span>SYSTEM ONLINE</span>
+  </div>
+
+  <div class="term">
+    <div class="term-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="term-title">rblx-cookie — warning-extractor</div>
+      <div style="width:40px"></div>
+    </div>
+
+    <div class="term-body">
+      <p class="logo-line">RBLX COOKIE<span class="caret"></span></p>
+      <p class="boot-line"><span>[boot]</span> warning block extractor initialized. ready for input.</p>
+
+      <div class="desc">
+        Extracts blocks starting with the literal sequence <code>_%7C</code>. Special characters
+        are allowed inside a block, a bare <code>%</code> ends it — except the literal sequences
+        <code>%7C_</code> and <code>_%7C</code>, which pass through and render as <code>|_</code>
+        and <code>_|</code>. Every block always ends on a letter or digit.
+      </div>
+
+      <div class="section">
+        <div class="prompt-label">input stream</div>
+        <textarea id="input" placeholder="Paste your text here...">_%7CWARNING123!! something else
+_%7C-abc!!! more text
+random_%7C_xyz9--- stop here
+_%7C!!! (no valid ending)
+_%7C50%off should stop before the percent
+_%7C%7C_valid should include the sequence</textarea>
+        <div class="options">
+          <label class="opt"><input type="checkbox" id="ignoreCase"> case-insensitive</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="out-head">
+          <div class="prompt-label">matches</div>
+          <div class="out-actions">
+            <span class="count-chip" id="count">0 found</span>
+            <button id="copyBtn" type="button">Copy all</button>
+            <button id="clearBtn" type="button">Clear all</button>
+          </div>
+        </div>
+        <div class="output" id="results"></div>
+      </div>
+
+      <div class="section">
+        <div class="prompt-label">highlighted preview</div>
+        <div class="preview-box" id="preview"></div>
+      </div>
+    </div>
+
+    <div class="term-footer">
+      <span>utf-8</span>
+      <span>regex engine: js</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const input = document.getElementById('input');
+  const ignoreCase = document.getElementById('ignoreCase');
+  const results = document.getElementById('results');
+  const count = document.getElementById('count');
+  const preview = document.getElementById('preview');
+  const copyBtn = document.getElementById('copyBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  let currentMatches = [];
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function decode(s) {
+    return s.replace(/%7C_/gi, '|_').replace(/_%7C/gi, '_|');
+  }
+
+  function getPattern() {
+    const flags = 'g' + (ignoreCase.checked ? 'i' : '');
+    return new RegExp(String.raw`_%7C(?:%7C_|_%7C|[^\s%])*[A-Za-z0-9]`, flags);
+  }
+
+  function run() {
+    const text = input.value;
+    const pattern = getPattern();
+    const matches = [...text.matchAll(pattern)];
+
+    count.textContent = matches.length + ' found';
+    currentMatches = matches.map(m => decode(m[0]));
+    copyBtn.disabled = matches.length === 0;
+    copyBtn.classList.remove('copied');
+    copyBtn.textContent = 'Copy all';
+
+    if (matches.length === 0) {
+      results.innerHTML = '<div class="empty">no matches found</div>';
+    } else {
+      results.innerHTML = matches.map((m) =>
+        `<div class="match-row"><span class="match-text">${escapeHtml(decode(m[0]))}</span></div>`
+      ).join('');
+    }
+
+    if (text.length === 0) {
+      preview.innerHTML = '<span style="opacity:0.5">nothing to preview yet</span>';
+      return;
+    }
+    let out = '';
+    let last = 0;
+    for (const m of matches) {
+      out += escapeHtml(text.slice(last, m.index));
+      out += `<mark>${escapeHtml(m[0])}</mark>`;
+      last = m.index + m[0].length;
+    }
+    out += escapeHtml(text.slice(last));
+    preview.innerHTML = out;
+  }
+
+  input.addEventListener('input', run);
+  ignoreCase.addEventListener('change', run);
+
+  copyBtn.addEventListener('click', async () => {
+    if (currentMatches.length === 0) return;
+    const text = currentMatches.join('\n\n');
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    copyBtn.textContent = 'Copied!';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy all';
+      copyBtn.classList.remove('copied');
+    }, 1500);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    run();
+    input.focus();
+  });
+
+  run();
+</script>
+</body>
+</html>
